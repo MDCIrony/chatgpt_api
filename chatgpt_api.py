@@ -1,11 +1,22 @@
 import openai  # pip install openai
 import typer  # pip install "typer[all]"
+import os
+import sys
+import argparse
 from rich import print  # pip install rich
 from rich.table import Table
-import os
 from dotenv import load_dotenv  # pip install python-dotenv
 
 load_dotenv()
+
+#Taking the API key from the .env file
+API_KEY = os.getenv("API_KEY")
+
+#Taking the user parameters in the initial call
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--content", help="Content to be sent to the API", type=str)
+args = parser.parse_args()
 
 """
 Webs de interés:
@@ -15,10 +26,27 @@ Webs de interés:
 - Rich: https://rich.readthedocs.io/en/stable/
 """
 
+def regular(content_parameter: str) -> None:
+    openai.api_key = API_KEY
+
+    context = {"role": "system",
+               "content": "Eres un asistente muy útil."}
+    messages = [context]
+
+    content = content_parameter
+
+    messages.append({"role": "user", "content": content})
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", messages=messages)
+    
+    response_content = response.choices[0].message.content
+
+    print(response_content)
 
 def main():
-
-    openai.api_key = os.getenv("API_KEY")
+    
+    openai.api_key = API_KEY
 
     print("💬 [bold green]ChatGPT API en Python[/bold green]")
 
@@ -69,4 +97,7 @@ def __prompt() -> str:
 
 
 if __name__ == "__main__":
+    if args.content:
+        regular(args.__contains__("content"))
     typer.run(main)
+    
